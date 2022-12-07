@@ -10,7 +10,6 @@ import UIKit
 
 class NetworkDataFetcher {
     let networkManager = NetworkManager()
-    var images = [UIImage]()
     
     func fetchMovies(urlString: String, response: @escaping (MovieResponse?) -> ()) {
         networkManager.request(urlString: urlString) { result in
@@ -28,23 +27,5 @@ class NetworkDataFetcher {
                 response(nil)
             }
         }
-    }
-    
-    func convertImage(urlString: String) -> UIImage {
-        var image: UIImage?
-        
-        let url = URL(string: urlString)
-                let sessionTask = URLSession.shared
-                let request = URLRequest(url: url!)
-                let task = sessionTask.dataTask(with: request, completionHandler: {(data: Data?, response: URLResponse?, error: Error?) -> Void in
-                    DispatchQueue.main.async {
-                        guard let safeData = data else {return}
-                        if (error == nil) {
-                            image = UIImage(data: safeData)
-                        }
-                    }
-                })
-                task.resume()
-        return image ?? UIImage(systemName: "nosign.app.fill")!
     }
 }

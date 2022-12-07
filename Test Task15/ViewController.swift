@@ -15,6 +15,8 @@ class ViewController: UIViewController {
     let networkDataFetcher = NetworkDataFetcher()
     var movieResponse: MovieResponse? = nil
     let movieCellIdentifier = "movieCell"
+    let dispatchGroup = DispatchGroup()
+    let dispatchQueue = DispatchQueue(label: "com.alibek.async")
     
     lazy var tableView: UITableView = {
         let tableView = UITableView()
@@ -64,10 +66,10 @@ extension ViewController: UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        
         let cell = tableView.dequeueReusableCell(withIdentifier: movieCellIdentifier, for: indexPath) as? MovieCell
-        cell?.userImage.image = networkDataFetcher.convertImage(urlString: (movieResponse?.results[indexPath.row].image)!)
-        cell?.headerTitle.text = movieResponse?.results[indexPath.row].title
-        cell?.contentText.text = movieResponse?.results[indexPath.row].description
+        
+        cell?.configure((movieResponse?.results[indexPath.row])!)
         return cell ?? UITableViewCell()
     }
 }
@@ -90,4 +92,5 @@ extension ViewController: UISearchBarDelegate {
         })
     }
 }
+
 
