@@ -6,7 +6,8 @@ class MovieCell: UITableViewCell {
     
     lazy var userImage: UIImageView = {
         let imageView = UIImageView()
-        imageView.contentMode = .scaleAspectFill
+        imageView.contentMode = .scaleAspectFit
+        
         return imageView
     }()
     
@@ -64,5 +65,28 @@ class MovieCell: UITableViewCell {
             make.leading.equalTo(contentView.snp.leading).inset(10)
             make.trailing.equalTo(contentView.snp.trailing).inset(10)
         }
+    }
+    
+    let dispatchGroup = DispatchGroup()
+    let dispatchQueue = DispatchQueue(label: "com.alibek.async")
+    
+    func configure(_ viewModel: Results) {
+        var safeData = Data()
+        let url = viewModel.image
+        
+        dispatchGroup.enter()
+        dispatchQueue.async {
+            let data = try! Data(contentsOf: URL(string: url)!)
+            safeData = data
+            self.dispatchGroup.leave()
+        }
+        dispatchGroup.notify(queue: DispatchQueue.main) {
+            [weak self] in
+            guard let self = self else {return}
+            self.userImage.image = UIImage(data: safeData)
+        }
+        
+        headerTitle.text = viewModel.title
+        contentText.text = viewModel.description
     }
 }
