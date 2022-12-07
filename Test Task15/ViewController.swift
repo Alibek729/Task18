@@ -56,6 +56,25 @@ extension ViewController {
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.delegate = self
     }
+    
+    private func loadImages() {
+        for i in 0...(movieResponse?.results.count)! {
+            dispatchGroup.enter()
+            
+            dispatchQueue.async {
+                self.networkDataFetcher.getImageURL(urlString: <#String#>) { urlString, error in
+                    guard
+                        let urlString = urlString
+                    else {
+                        return
+                    }
+                    let image = self.networkDataFetcher.loadImage(urlString: urlString)
+                    self.imageArray.append(image ?? UIImage())
+                    dispatchGroup.leave()
+                }
+            }
+        }
+    }
 }
 
 //MARK: - TableViewDataSource
