@@ -15,6 +15,8 @@ class ViewController: UIViewController {
     let networkDataFetcher = NetworkDataFetcher()
     var movieResponse: MovieResponse? = nil
     let movieCellIdentifier = "movieCell"
+    let dispatchGroup = DispatchGroup()
+    let dispatchQueue = DispatchQueue(label: "com.alibek.async")
     
     lazy var tableView: UITableView = {
         let tableView = UITableView()
@@ -53,6 +55,25 @@ extension ViewController {
         searchController.searchBar.delegate = self
         searchController.obscuresBackgroundDuringPresentation = false
         searchController.searchBar.delegate = self
+    }
+    
+    private func loadImages() {
+        for i in 0...(movieResponse?.results.count)! {
+            dispatchGroup.enter()
+            
+            dispatchQueue.async {
+                self.networkDataFetcher.getImageURL(urlString: <#String#>) { urlString, error in
+                    guard
+                        let urlString = urlString
+                    else {
+                        return
+                    }
+                    let image = self.networkDataFetcher.loadImage(urlString: urlString)
+                    self.imageArray.append(image ?? UIImage())
+                    dispatchGroup.leave()
+                }
+            }
+        }
     }
 }
 
