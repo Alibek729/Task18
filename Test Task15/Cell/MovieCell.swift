@@ -7,7 +7,7 @@ class MovieCell: UITableViewCell {
     lazy var userImage: UIImageView = {
         let imageView = UIImageView()
         imageView.contentMode = .scaleAspectFit
-        
+        imageView.frame = CGRect(x: 0, y: 0, width: 200, height: 200)
         return imageView
     }()
     
@@ -28,7 +28,7 @@ class MovieCell: UITableViewCell {
     private lazy var vStackView: UIStackView = {
         let stackView = UIStackView()
         stackView.axis = .vertical
-        stackView.distribution = .fill
+        stackView.distribution = .fillProportionally
         
         stackView.addArrangedSubview(headerTitle)
         stackView.addArrangedSubview(contentText)
@@ -59,6 +59,12 @@ class MovieCell: UITableViewCell {
     }
     
     private func setupConstraints() {
+        
+        userImage.snp.makeConstraints { make in
+            make.width.equalTo(150)
+            make.height.equalTo(250)
+        }
+        
         hStackView.snp.makeConstraints { make in
             make.top.equalTo(contentView.snp.top).inset(5)
             make.bottom.equalTo(contentView.snp.bottom).inset(5)
@@ -71,20 +77,20 @@ class MovieCell: UITableViewCell {
     let dispatchQueue = DispatchQueue(label: "com.alibek.async")
     
     func configure(_ viewModel: Results) {
-        var safeData = Data()
-        let url = viewModel.image
         
-        dispatchGroup.enter()
-        dispatchQueue.async {
-            let data = try! Data(contentsOf: URL(string: url)!)
-            safeData = data
-            self.dispatchGroup.leave()
-        }
-        dispatchGroup.notify(queue: DispatchQueue.main) {
-            [weak self] in
-            guard let self = self else {return}
-            self.userImage.image = UIImage(data: safeData)
-        }
+        guard let url = URL(string: viewModel.image) else { return }
+        
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            if let error {
+                print("image loading error:", error.localizedDescription)
+            } else {
+                if let safeData = data {
+                    DispatchQueue.main.async {
+                        self.userImage.image = UIImage(data: safeData)
+                    }
+                }
+            }
+        }.resume()
         
         headerTitle.text = viewModel.title
         contentText.text = viewModel.description

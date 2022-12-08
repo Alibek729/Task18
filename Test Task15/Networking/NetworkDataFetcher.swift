@@ -10,6 +10,8 @@ import UIKit
 
 class NetworkDataFetcher {
     let networkManager = NetworkManager()
+    let dispatchGroup = DispatchGroup()
+    let dispatchQueue = DispatchQueue(label: "com.alibek.async")
     
     func fetchMovies(urlString: String, response: @escaping (MovieResponse?) -> ()) {
         networkManager.request(urlString: urlString) { result in
